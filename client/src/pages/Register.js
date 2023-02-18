@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, redirect } from "react-router-dom";
 import Wrapper from "../assets/wrappers/RegisterPage";
 import { Logo, FormRow, Alert } from "../components";
 import { useGlobalContext } from "../context/AppContext";
@@ -14,24 +14,56 @@ const initialState = {
 const Register = () => {
   const [formData, setFormData] = useState(initialState);
 
-  const { alertType, showAlert, alertText, isLoading, displayAlert } =
-    useGlobalContext();
+  const {
+    alertType,
+    showAlert,
+    alertText,
+    isLoading,
+    displayAlert,
+    registerUser,
+    user,
+    isAuthenticated,
+  } = useGlobalContext();
+  const navigate = useNavigate();
+
+  // useEffect(()=>{
+  //   if(isAuthenticated) redirect('/')
+  // }, [isAuthenticated, user])
+
+  useEffect(() => {
+    if (user && isAuthenticated) {
+      const timerId = setTimeout(() => {
+        navigate("/");
+      }, 3000);
+
+      return () => clearTimeout(timerId);
+    }
+  }, [user, navigate, isAuthenticated]);
+
   const { name, email, password, password2 } = formData;
 
   function handleChange(e) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    console.log(formData);
   }
 
   const onSubmit = (e) => {
     e.preventDefault();
-    if (!name || !email || !password || !password2 || password !== password2) {
+    if (!name || !email || !password || !password2) {
       displayAlert({
         alertText: "Please fill all fields",
         alertType: "danger",
       });
       return;
     }
+    if (password !== password2) {
+      displayAlert({
+        alertText: "Password do not match",
+        alertType: "danger",
+      });
+      return;
+    }
+
+    registerUser({ name, email, password });
   };
 
   return (
@@ -67,7 +99,7 @@ const Register = () => {
           labelText="Confirm Password"
         />
 
-        <button type="submit" className="btn btn-block">
+        <button type="submit" className="btn btn-block" disabled={isLoading}>
           Sign up
         </button>
         <p>

@@ -3,8 +3,8 @@ const app = express();
 import dotenv from "dotenv";
 dotenv.config();
 import "express-async-errors";
+import cors from 'cors'
 import morgan from "morgan";
-import mongoose from "mongoose";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import path from "path";
@@ -13,9 +13,15 @@ import bodyParser from "body-parser";
 // hello
 // db and authenticateUser
 import connectDB from "./db/connectDB.js";
+
 // routers
 import authRouter from "./routes/authRoutes.js";
 import jobRouter from "./routes/jobRoutes.js";
+
+// ====================
+// app.use(cors())
+
+
 // third-party middleware
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));

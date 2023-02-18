@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, redirect } from "react-router-dom";
 import Wrapper from "../assets/wrappers/RegisterPage";
 import { Logo, FormRow, Alert } from "../components";
 import { useGlobalContext } from "../context/AppContext";
@@ -12,9 +12,31 @@ const initialState = {
 const Login = () => {
   const [formData, setFormData] = useState(initialState);
 
-  const { alertType, showAlert, alertText, isLoading, displayAlert } =
-    useGlobalContext();
+  const {
+    alertType,
+    showAlert,
+    alertText,
+    isLoading,
+    displayAlert,
+    loginUser,
+    user,
+    isAuthenticated,
+  } = useGlobalContext();
   const { email, password } = formData;
+  const navigate = useNavigate();
+
+  // useEffect(() => {
+  //   if (isAuthenticated) redirect("/");
+  // });
+
+  useEffect(() => {
+    if (user && isAuthenticated) {
+      const timerId = setTimeout(() => {
+        navigate("/");
+      }, 3000);
+      return () => clearTimeout(timerId);
+    }
+  }, [user, navigate, isAuthenticated]);
 
   function handleChange(e) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -29,6 +51,8 @@ const Login = () => {
       });
       return;
     }
+
+    loginUser(formData);
   };
 
   return (
@@ -50,7 +74,7 @@ const Login = () => {
           handleChange={handleChange}
         />
 
-        <button type="submit" className="btn btn-block">
+        <button type="submit" className="btn btn-block" disabled={isLoading}>
           login
         </button>
         <p>

@@ -23,7 +23,11 @@ const Landing = () => {
             etsy squid banjo ascot locavore.
           </p>
           <Link to={"/register"} className="btn btn-hero">
-            Login / Register
+            Register
+          </Link>
+          <p></p>
+          <Link to={"/login"} className="btn btn-hero">
+            Login
           </Link>
         </div>
         {/* main-hero ing */}
