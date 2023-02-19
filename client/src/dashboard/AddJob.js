@@ -16,7 +16,10 @@ const AddJob = () => {
     status,
     statusOptions,
     createJob,
-    clearAddJobForm,handleFormChange
+    clearAddJobForm,
+    handleFormChange,
+    editJob,
+    editJobId,
   } = useGlobalContext();
 
   function handleChange(e) {
@@ -33,7 +36,19 @@ const AddJob = () => {
       return;
     }
 
-    createJob({company, position, jobLocation, status, jobType});
+    if (isEditing) {
+      editJob({
+        company,
+        position,
+        jobLocation,
+        status,
+        jobType,
+        jobId: editJobId,
+      });
+      return;
+    }
+
+    createJob({ company, position, jobLocation, status, jobType });
   };
 
   return (

@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useReducer } from "react";
 import {
-  SET_SLERT,
   SHOW_ALERT,
   RESET_ALERT,
   REGISTER_USER_BEGIN,
@@ -23,6 +22,15 @@ import {
   HANDLE_FORM_CHANGE,
   GET_JOBS_BEGIN,
   GET_JOBS_SUCCESS,
+  GET_JOBS_ERROR,
+  SET_EDIT_JOB,
+  DELETE_JOB,
+  EDIT_JOB_BEGIN,
+  EDIT_JOB_ERROR,
+  SHOW_STATS_BEGIN,
+  SHOW_STATS_SUCCESS,
+  CHANGE_FILTER,
+  CLEAR_FILTER,
 } from "./actions";
 import appReducer from "./appReducer";
 import axios from "axios";
@@ -73,6 +81,15 @@ export const initialState = {
   totalJobs: 0,
   numOfPages: 1,
   page: 1,
+  // stats
+  stats: {},
+  monthlyApplications: [],
+  // filtering
+  search: "",
+  searchStatus: "all",
+  searchType: "all",
+  sort: "latest",
+  sortOptions: ["latest", "oldest", "a-z", "z-a"],
 };
 
 const AppContext = createContext(null);
@@ -287,9 +304,12 @@ export const AppProvider = ({ children }) => {
     };
 
     try {
+      const { page, search, searchStatus, searchType, sort } = state;
+      const url = `/api/v1/jobs?page=${page}&search=${search}&status=${searchStatus}&jobType=${searchType}&sort=${sort}`;
+
       const {
         data: { jobs, totalJobs, numOfPages },
-      } = await axios.get("/api/v1/jobs", config);
+      } = await axios.get(url, config);
 
       dispatch({
         type: GET_JOBS_SUCCESS,
@@ -299,14 +319,94 @@ export const AppProvider = ({ children }) => {
       const msg = `${error.response.status} Error : ${
         error.response.data.msg
           ? error.response.data.msg
-          : "Error occcured while updating data"
+          : "Error occcured while fetching jobs"
       }`;
       displayAlert({
         alertType: "danger",
         alertText: msg,
       });
-      dispatch({ type: CREATE_JOB_ERROR });
+      // logoutUser();
+      dispatch({ type: GET_JOBS_ERROR });
     }
+  };
+  const setEditJob = (id) => {
+    dispatch({ type: SET_EDIT_JOB, payload: { id } });
+  };
+  const editJob = async (formData) => {
+    dispatch({ type: EDIT_JOB_BEGIN });
+    const config = {
+      headers: {
+        "Content-Type": "Application/json",
+      },
+    };
+    try {
+      await axios.patch(
+        `/api/v1/jobs/${state.editJobId}`,
+        JSON.stringify(formData),
+        config
+      );
+
+      displayAlert({
+        alertType: "success",
+        alertText: "Job Edited!",
+      });
+      clearAddJobForm();
+      getJobs();
+    } catch (error) {
+      if (error.response.status === 401) return;
+      const msg = `${error.response.status} Error : ${
+        error.response.data.msg
+          ? error.response.data.msg
+          : "Error occcured while updating data"
+      }`;
+      dispatch({
+        type: EDIT_JOB_ERROR,
+        payload: { msg },
+      });
+    }
+  };
+  const deleteJob = async (jobId) => {
+    dispatch({ type: DELETE_JOB });
+    try {
+      const red = await axios.delete(`/api/v1/jobs/${jobId}`);
+
+      getJobs();
+    } catch (error) {
+      logoutUser();
+    }
+  };
+  const showStats = async () => {
+    dispatch({ type: SHOW_STATS_BEGIN });
+    try {
+      const { data } = await axios("/api/v1/jobs/stats");
+      dispatch({
+        type: SHOW_STATS_SUCCESS,
+        payload: {
+          stats: data.defaultStats,
+          monthlyApplications: data.monthlyApplications,
+        },
+      });
+    } catch (error) {
+      logoutUser();
+    }
+    dispatch({ type: RESET_ALERT });
+  };
+
+  // Filters
+  const changeFilter = (filters) => {
+    dispatch({ type: CHANGE_FILTER, payload: filters });
+    getJobs();
+  };
+
+  const clearFilter = () => {
+    dispatch({ type: CLEAR_FILTER });
+  };
+
+  const loadSampleData = async () => {
+    try {
+      await axios("/api/v1/jobs/populate");
+      showStats();
+    } catch (error) {}
   };
 
   return (
@@ -324,6 +424,13 @@ export const AppProvider = ({ children }) => {
         clearAddJobForm,
         handleFormChange,
         getJobs,
+        setEditJob,
+        deleteJob,
+        editJob,
+        showStats,
+        changeFilter,
+        clearFilter,
+        loadSampleData,
       }}
     >
       {children}

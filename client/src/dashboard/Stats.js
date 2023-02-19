@@ -1,9 +1,27 @@
-import React from 'react'
+import React from "react";
+import { useGlobalContext } from "../context/AppContext";
+import { ChartsContainer, StatsContainer } from "../components";
+import Spinner from "../shared_layout/Spinner";
 
 const Stats = () => {
-  return (
-    <div>Stats</div>
-  )
-}
+  const { monthlyApplications, isLoading, showStats, jobs } =
+    useGlobalContext();
 
-export default Stats
+  React.useEffect(() => {
+    showStats();
+        //eslint-disable-next-line
+  }, []);
+
+  if (isLoading) {
+    return <Spinner />;
+  }
+
+  return (
+    <>
+      <StatsContainer />
+      {monthlyApplications.length > 0 && <ChartsContainer />}
+    </>
+  );
+};
+
+export default Stats;

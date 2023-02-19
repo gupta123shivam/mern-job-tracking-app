@@ -3,13 +3,17 @@ const app = express();
 import dotenv from "dotenv";
 dotenv.config();
 import "express-async-errors";
-import cors from 'cors'
+import cors from "cors";
 import morgan from "morgan";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import path from "path";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
+import helmet from "helmet";
+import xss from "xss-clean";
+import mongoSanitize from "express-mongo-sanitize";
+import rateLimiter from "express-rate-limit";
 // hello
 // db and authenticateUser
 import connectDB from "./db/connectDB.js";
@@ -20,6 +24,10 @@ import jobRouter from "./routes/jobRoutes.js";
 
 // ====================
 // app.use(cors())
+app.use(express.json());
+app.use(helmet());
+app.use(xss());
+app.use(mongoSanitize());
 
 
 // third-party middleware
@@ -39,19 +47,19 @@ import errorHandlerMiddleware from "./middleware/error.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // only when ready to deploy
-// app.use(express.static(path.resolve(__dirname, './client/build')));
-
-// only when ready to deploy
-// app.get("*", (req, res) => {
-//   res.sendFile(path.resolve(__dirname, "./client/build", "index.html"));
-// });
+app.use(express.static(path.resolve(__dirname, "./client/build")));
 
 // =======================================================
-app.get("/", (_, res) => {
-  res.send("reached the server api");
-});
+// app.get("/", (_, res) => {
+//   res.send("reached the server api");
+// });
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/jobs", jobRouter);
+
+// only when ready to deploy
+app.get("*", (req, res) => {
+  res.sendFile(path.resolve(__dirname, "./client/build", "index.html"));
+});
 
 // Error and Not found handlers
 app.use("*", notFoundMiddleware);
