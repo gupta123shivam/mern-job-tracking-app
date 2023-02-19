@@ -1,4 +1,5 @@
 import {
+  getUser,
   register,
   login,
   updateUser,
@@ -11,9 +12,10 @@ import auth from "../middleware/auth.js";
 
 const authRouter = express.Router();
 
-authRouter.route("/").get(getAlluser).delete(deleteAllUser);
+authRouter.get("/", auth, getUser);
+authRouter.route("/allUser").get(getAlluser).delete(deleteAllUser);
 authRouter.route("/logout").get(auth, logout);
-authRouter.route("/login").post(login)
+authRouter.route("/login").post(login);
 authRouter.route("/register").post(register);
 authRouter.route("/updateUser").post(auth, updateUser);
 

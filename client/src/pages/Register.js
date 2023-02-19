@@ -15,9 +15,7 @@ const Register = () => {
   const [formData, setFormData] = useState(initialState);
 
   const {
-    alertType,
     showAlert,
-    alertText,
     isLoading,
     displayAlert,
     registerUser,
@@ -71,7 +69,7 @@ const Register = () => {
       <form className="form" onSubmit={onSubmit}>
         <Logo />
         <h3>Register</h3>
-        {showAlert && <Alert alert={{ alertText, alertType }} />}
+        {showAlert && <Alert />}
         <FormRow
           name="name"
           type="text"

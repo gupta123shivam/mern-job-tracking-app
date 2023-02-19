@@ -13,9 +13,7 @@ const Login = () => {
   const [formData, setFormData] = useState(initialState);
 
   const {
-    alertType,
     showAlert,
-    alertText,
     isLoading,
     displayAlert,
     loginUser,
@@ -60,7 +58,7 @@ const Login = () => {
       <form className="form" onSubmit={onSubmit}>
         <Logo />
         <h3>Login</h3>
-        {showAlert && <Alert alert={{ alertText, alertType }} />}
+        {showAlert && <Alert />}
         <FormRow
           name="email"
           type="email"

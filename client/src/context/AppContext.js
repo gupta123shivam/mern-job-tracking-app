@@ -11,6 +11,18 @@ import {
   LOGIN_USER_ERROR,
   TOGGLE_SIDEBAR,
   LOGOUT_USER,
+  UPDATE_USER_BEGIN,
+  UPDATE_USER_SUCCESS,
+  UPDATE_USER_ERROR,
+  LOAD_USER_BEGIN,
+  LOAD_USER,
+  CREATE_JOB_BEGIN,
+  CREATE_JOB_SUCCESS,
+  CREATE_JOB_ERROR,
+  CLEAR_ADD_JOB_FORM,
+  HANDLE_FORM_CHANGE,
+  GET_JOBS_BEGIN,
+  GET_JOBS_SUCCESS,
 } from "./actions";
 import appReducer from "./appReducer";
 import axios from "axios";
@@ -32,7 +44,7 @@ const removeUserFromLocalStorage = () => {
 const token = JSON.parse(localStorage.getItem("token"));
 const user = JSON.parse(localStorage.getItem("user"));
 const userLocation = JSON.parse(localStorage.getItem("location"));
-const isAuthenticated = user && token;
+const isAuthenticated = Boolean(user && token);
 
 // Initial Provider State
 export const initialState = {
@@ -46,6 +58,21 @@ export const initialState = {
   jobLocation: userLocation || "",
   isAuthenticated: isAuthenticated,
   showSidebar: true,
+  // Job States
+  isEditing: false,
+  editJobId: "",
+  position: "",
+  company: "",
+  // jobLocation
+  jobTypeOptions: ["full-time", "part-time", "remote", "internship"],
+  jobType: "full-time",
+  statusOptions: ["pending", "interview", "declined"],
+  status: "pending",
+  // All Jobs
+  jobs: [],
+  totalJobs: 0,
+  numOfPages: 1,
+  page: 1,
 };
 
 const AppContext = createContext(null);
@@ -53,6 +80,9 @@ const AppContext = createContext(null);
 export const AppProvider = ({ children }) => {
   // Reducer Function
   const [state, dispatch] = useReducer(appReducer, initialState);
+
+  // axios default
+  axios.defaults.headers["Authorization"] = `Bearer ${state.token}`;
 
   const displayAlert = ({ alertText, alertType }) => {
     dispatch({ type: SHOW_ALERT, payload: { alertText, alertType } });
@@ -140,13 +170,143 @@ export const AppProvider = ({ children }) => {
 
   // Logout User
   const logoutUser = async () => {
-    // dispatch({ type: LOGOUT_USER });
-    // removeUserFromLocalStorage();
+    dispatch({ type: LOGOUT_USER });
+    removeUserFromLocalStorage();
     await axios("api/v1/auth/logout");
   };
 
   const toggleSidebar = () => {
     dispatch({ type: TOGGLE_SIDEBAR });
+  };
+
+  const updateUser = async (formData) => {
+    dispatch({ type: UPDATE_USER_BEGIN });
+    const config = {
+      headers: {
+        "Content-Type": "Application/json",
+      },
+    };
+
+    try {
+      const res = await axios.post(
+        "/api/v1/auth/updateUser",
+        JSON.stringify(formData),
+        config
+      );
+
+      displayAlert({
+        alertType: "success",
+        alertText: "User Data Updated!",
+      });
+
+      dispatch({ type: UPDATE_USER_SUCCESS, payload: res.data });
+
+      // Update user, token, location to local storage
+      addUserToLocalStorage(res.data);
+    } catch (error) {
+      const msg = `${error.response.status} Error : ${
+        error.response.data.msg
+          ? error.response.data.msg
+          : "Error occcured while updating data"
+      }`;
+      displayAlert({
+        alertType: "danger",
+        alertText: msg,
+      });
+
+      dispatch({ type: UPDATE_USER_ERROR });
+    }
+  };
+
+  const loadUser = async () => {
+    dispatch({ type: LOAD_USER_BEGIN });
+
+    try {
+      const res = await axios.get("/api/v1/auth");
+
+      dispatch({ type: LOAD_USER, payload: res.data });
+
+      // Saving user, token, location to local storage
+      addUserToLocalStorage(res.data);
+    } catch (error) {
+      if (error.response.status === 401) {
+        logoutUser();
+      }
+    }
+  };
+
+  // ================== JOB =======================
+  const createJob = async (formData) => {
+    dispatch({ type: CREATE_JOB_BEGIN });
+    const config = {
+      headers: {
+        "Content-Type": "Application/json",
+      },
+    };
+
+    try {
+      const res = await axios.post(
+        "/api/v1/jobs",
+        JSON.stringify(formData),
+        config
+      );
+
+      displayAlert({
+        alertType: "success",
+        alertText: "Job Created!",
+      });
+
+      dispatch({ type: CREATE_JOB_SUCCESS, payload: res.data });
+
+      clearAddJobForm();
+    } catch (error) {
+      const msg = `${error.response.status} Error : ${
+        error.response.data.msg
+          ? error.response.data.msg
+          : "Error occcured while updating data"
+      }`;
+      displayAlert({
+        alertType: "danger",
+        alertText: msg,
+      });
+      dispatch({ type: CREATE_JOB_ERROR });
+    }
+  };
+  const clearAddJobForm = () => {
+    dispatch({ type: CLEAR_ADD_JOB_FORM });
+  };
+  const handleFormChange = (formData) => {
+    dispatch({ type: HANDLE_FORM_CHANGE, payload: formData });
+  };
+  const getJobs = async () => {
+    dispatch({ type: GET_JOBS_BEGIN });
+    const config = {
+      headers: {
+        "Content-Type": "Application/json",
+      },
+    };
+
+    try {
+      const {
+        data: { jobs, totalJobs, numOfPages },
+      } = await axios.get("/api/v1/jobs", config);
+
+      dispatch({
+        type: GET_JOBS_SUCCESS,
+        payload: { jobs, totalJobs, numOfPages },
+      });
+    } catch (error) {
+      const msg = `${error.response.status} Error : ${
+        error.response.data.msg
+          ? error.response.data.msg
+          : "Error occcured while updating data"
+      }`;
+      displayAlert({
+        alertType: "danger",
+        alertText: msg,
+      });
+      dispatch({ type: CREATE_JOB_ERROR });
+    }
   };
 
   return (
@@ -158,6 +318,12 @@ export const AppProvider = ({ children }) => {
         loginUser,
         logoutUser,
         toggleSidebar,
+        updateUser,
+        loadUser,
+        createJob,
+        clearAddJobForm,
+        handleFormChange,
+        getJobs,
       }}
     >
       {children}

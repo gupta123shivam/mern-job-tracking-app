@@ -1,9 +1,20 @@
-import React from 'react'
+import React from "react";
+import { useGlobalContext } from "../context/AppContext.js";
+import { JobsContainer, SearchContainer } from "../dashboard";
 
 const AllJobs = () => {
-  return (
-    <div>AllJobs</div>
-  )
-}
+  const { getJobs } = useGlobalContext();
 
-export default AllJobs
+  React.useEffect(() => {
+    getJobs();
+  }, []);
+
+  return (
+    <>
+      <SearchContainer />
+      <JobsContainer />
+    </>
+  );
+};
+
+export default AllJobs;

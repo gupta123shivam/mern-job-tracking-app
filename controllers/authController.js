@@ -86,21 +86,46 @@ const updateUser = async (req, res) => {
 
   await user.save();
 
-  const token = user.genRefreshToken();
-  res.status(StatusCodes.OK).json({
-    user,
-    token,
+  const refreshToken = await user.getRefreshToken();
+  const userData = {
+    user: {
+      email: user.email,
+      name: user.name,
+      location: user.location,
+      lastname: user.lastname,
+    },
+    token: refreshToken,
     location: user.location,
-  });
+  };
+  res.status(StatusCodes.OK).json(userData);
 };
 const logout = async (req, res) => {
   const user = await User.findById(req.user.userId);
   if (!user.isLoggedIn) {
     throw new CustomError.BadRequestError("You are not logged in.");
   }
-  await user.logout();
+  await user.logOut();
 
   res.status(StatusCodes.OK).json({ msg: "User logged out successfully" });
+};
+
+const getUser = async (req, res) => {
+  const user = await User.findById(req.user.userId);
+  if (!user.isLoggedIn) {
+    throw new CustomError.UnauthenticatedError("Not Logged in");
+  }
+  const refreshToken = await user.getRefreshToken();
+  const userData = {
+    user: {
+      email: user.email,
+      name: user.name,
+      location: user.location,
+      lastname: user.lastname,
+    },
+    token: refreshToken,
+    location: user.location,
+  };
+  res.status(StatusCodes.OK).json(userData);
 };
 
 const getAlluser = async (req, res) => {
@@ -113,4 +138,12 @@ const deleteAllUser = async (req, res) => {
   res.status(StatusCodes.CREATED).json(users);
 };
 
-export { register, login, updateUser, logout, getAlluser, deleteAllUser };
+export {
+  register,
+  login,
+  updateUser,
+  logout,
+  getAlluser,
+  deleteAllUser,
+  getUser,
+};

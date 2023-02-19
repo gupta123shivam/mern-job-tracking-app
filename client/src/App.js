@@ -5,8 +5,13 @@ import AlreadyAuthenticatedRoute from "./routing/AlreadyAuthenticatedRoute.js";
 import { AddJob, AllJobs, Profile, Stats } from "./dashboard";
 import { Landing, Error, Register, Login } from "./pages";
 import SharedLayout from "./shared_layout/SharedLayout.js";
+import { useGlobalContext } from "./context/AppContext.js";
 
 const App = () => {
+  const { loadUser } = useGlobalContext();
+  React.useEffect(() => {
+    // loadUser();
+  }, []);
   return (
     <Router>
       <Routes>
