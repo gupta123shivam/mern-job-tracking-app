@@ -6,5 +6,5 @@
 
 ## It's a social media app build from scratch in MERN. It is the best social media developers connections app. Wanna try!
 
-# Like it! follow my Github to see projects like this
+### Like it! follow my Github to see projects like this
 
