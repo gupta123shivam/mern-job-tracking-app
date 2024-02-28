@@ -38,7 +38,7 @@ To get started with Jobify, simply follow these steps:
 5. **Profile Management**: Access and update your profile information to customize your job search experience.
 6. **Logout**: Safely logout from the platform to protect your account and personal data.
 
-## How to Use
+## How to Use the features
 To utilize the features of the All Jobs page, follow these steps:
 1. **Navigate to the All Jobs Page**: Click on the All Jobs tab in the navigation menu to access the page.
 2. **Browse Job Listings**: Scroll through the list of job listings to explore available opportunities.
