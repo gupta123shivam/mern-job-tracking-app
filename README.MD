@@ -31,7 +31,8 @@ Jobify is a powerful full-stack job search application designed to simplify the 
 
 ## Get Started
 To get started with Jobify, simply follow these steps:
-1. **Register/Login**: Create an account or log in to start exploring job opportunities.
+1. **Register/Login**: Register an account or log in to start exploring job opportunities. **Click on Load sample data**
+  - Demo Login Details : Email [john@gmail.com]  Password [123456]
 2. **Dashboard**: Use the dashboard to track your job application progress and view key metrics.
 3. **Job Search**: Explore job listings using advanced filtering options to find the perfect fit for your career.
 4. **Job Management**: Manage your job listings by editing, deleting, or creating new listings to stay organized.
